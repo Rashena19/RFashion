@@ -32,6 +32,37 @@
   background-color: #DB7093;
 }
 
+.loading {
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.2rem;
+  color: #666;
+}
+
+.error-message {
+  color: #dc3545;
+  text-align: center;
+  padding: 2rem;
+  margin-bottom: 1rem;
+}
+
+.retry-button {
+  display: block;
+  margin: 0 auto;
+  padding: 0.75rem 1.5rem;
+  background-color: #FF69B4;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.retry-button:hover {
+  background-color: #DB7093;
+}
+
 .posts-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -46,6 +77,12 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.post-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
 .post-image {
@@ -57,11 +94,18 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.post-card:hover .post-image img {
+  transform: scale(1.05);
 }
 
 .post-content {
   padding: 1.5rem;
   flex-grow: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .post-content h2 {
@@ -75,6 +119,7 @@
   color: #666;
   margin-bottom: 1rem;
   line-height: 1.6;
+  flex-grow: 1;
 }
 
 .post-meta {
@@ -92,6 +137,7 @@
   border-radius: 25px;
   font-weight: 600;
   transition: all 0.3s;
+  text-align: center;
 }
 
 .read-more:hover {
@@ -99,10 +145,19 @@
   color: white;
 }
 
-.error-message {
-  color: #dc3545;
+.no-posts {
+  grid-column: 1 / -1;
   text-align: center;
-  padding: 2rem;
+  padding: 3rem;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.no-posts p {
+  color: #666;
+  font-size: 1.2rem;
+  margin: 0;
 }
 
 /* Tablet breakpoint */
@@ -122,5 +177,9 @@
     flex-direction: column;
     gap: 1rem;
     text-align: center;
+  }
+
+  .header h1 {
+    font-size: 2rem;
   }
 } 

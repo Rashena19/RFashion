@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import '../styles/CreatePost.css';
 
-function CreatePost() {
+function EditPost() {
+  const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [formData, setFormData] = useState({
@@ -17,6 +18,52 @@ function CreatePost() {
     tags: '',
     image: null
   });
+
+  useEffect(() => {
+    const fetchPost = async () => {
+      try {
+        console.log('Fetching post with ID:', id);
+        const response = await axios.get(`http://localhost:3001/api/posts/${id}`);
+        const post = response.data;
+        
+        console.log('Fetched post data:', post);
+        
+        if (!post) {
+          setError('Post not found');
+          setLoading(false);
+          return;
+        }
+
+        // Check if user is the author
+        if (post.authorId !== user.id) {
+          setError('You are not authorized to edit this post');
+          setLoading(false);
+          return;
+        }
+        
+        setFormData({
+          title: post.title,
+          content: post.content,
+          excerpt: post.excerpt || '',
+          tags: post.tags ? post.tags.join(', ') : '',
+          image: null
+        });
+
+        // Set image preview if post has an image
+        if (post.image) {
+          setImagePreview(post.image);
+        }
+        
+        setLoading(false);
+      } catch (err) {
+        console.error('Error fetching post:', err);
+        setError(err.response?.data?.message || 'Failed to load post. Please try again.');
+        setLoading(false);
+      }
+    };
+
+    fetchPost();
+  }, [id, user.id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -45,10 +92,11 @@ function CreatePost() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError(null);
 
     try {
+      console.log('Submitting updated post data:', formData);
+      
       const postData = new FormData();
       postData.append('title', formData.title);
       postData.append('content', formData.content);
@@ -58,26 +106,46 @@ function CreatePost() {
         postData.append('image', formData.image);
       }
 
-      const response = await axios.post('http://localhost:3001/api/posts', postData, {
+      console.log('Processed post data:', postData);
+
+      const response = await axios.put(`http://localhost:3001/api/posts/${id}`, postData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
 
-      navigate(`/post/${response.data.id}`);
+      console.log('Update response:', response.data);
+      navigate(`/post/${id}`);
     } catch (err) {
-      console.error('Error creating post:', err);
-      setError(err.response?.data?.message || 'Failed to create post. Please try again.');
-    } finally {
-      setLoading(false);
+      console.error('Error updating post:', err);
+      setError(err.response?.data?.message || 'Failed to update post. Please try again.');
     }
   };
+
+  if (loading) {
+    return (
+      <div className="container">
+        <div className="loading">Loading post...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container">
+        <div className="error-message">{error}</div>
+        <button onClick={() => navigate(`/post/${id}`)} className="back-button">
+          Back to Post
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="container">
       <div className="create-post">
-        <h1>Create New Post</h1>
+        <h1>Edit Post</h1>
         {error && <div className="error-message">{error}</div>}
         <form onSubmit={handleSubmit}>
           <div className="form-group">
@@ -143,13 +211,22 @@ function CreatePost() {
             />
           </div>
 
-          <button type="submit" className="submit-button" disabled={loading}>
-            {loading ? 'Creating...' : 'Create Post'}
-          </button>
+          <div className="form-actions">
+            <button type="submit" className="submit-button">
+              Update Post
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate(`/post/${id}`)}
+              className="cancel-button"
+            >
+              Cancel
+            </button>
+          </div>
         </form>
       </div>
     </div>
   );
 }
 
-export default CreatePost; 
+export default EditPost; 

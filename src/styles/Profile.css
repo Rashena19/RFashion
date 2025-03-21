@@ -99,6 +99,29 @@
   margin: 0;
 }
 
+.loading {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+  font-size: 1.2rem;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
 .error-message {
   text-align: center;
   color: #dc3545;

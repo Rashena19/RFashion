@@ -1,119 +1,167 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { format } from 'date-fns';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import axios from 'axios';
 import '../styles/BlogPost.css';
-
-// Using the same blog posts data from Home page
-const blogPosts = [
-  {
-    id: 1,
-    title: 'Spring Fashion Trends 2025',
-    excerpt: 'Discover the latest spring fashion trends that are taking over the runway.',
-    image: '/photo1.jpeg',
-    date: new Date('2025-03-18'),
-    author: 'Jane Style',
-    content: `Spring 2025 brings a fresh wave of fashion trends that are both innovative and sustainable. 
-    From bold color combinations to eco-friendly materials, this season is all about making a statement while 
-    being conscious of our environmental impact. Key trends include oversized blazers, sustainable denim, 
-    and statement accessories that add personality to any outfit.`
-  },
-  {
-    id: 2,
-    title: 'Sustainable Fashion Guide',
-    excerpt: 'How to build a sustainable wardrobe without compromising on style.',
-    image: '/photo2.jpeg',
-    date: new Date('2025-03-18'),
-    author: 'Emma Eco',
-    content: `Building a sustainable wardrobe doesn't mean sacrificing style. This guide explores how to 
-    make conscious fashion choices that benefit both the environment and your personal style. Learn about 
-    sustainable materials, ethical brands, and how to extend the life of your clothing through proper care 
-    and maintenance.`
-  },
-  {
-    id: 3,
-    title: 'Summer Collection Preview',
-    excerpt: 'Get a sneak peek at the hottest summer fashion trends.',
-    image: '/photo3.jpeg',
-    date: new Date('2025-03-18'),
-    author: 'Sarah Summer',
-    content: `Summer 2025 is all about bold prints, lightweight fabrics, and versatile pieces that can 
-    take you from day to night. This preview highlights the key pieces you'll need in your wardrobe, 
-    from breezy dresses to statement accessories that will keep you cool and stylish all season long.`
-  },
-  {
-    id: 4,
-    title: 'Street Style Inspiration',
-    excerpt: 'Urban fashion trends that are making waves this season.',
-    image: '/photo4.jpeg',
-    date: new Date('2025-03-18'),
-    author: 'Alex Urban',
-    content: `Street style continues to influence high fashion, with urban trends making their way into 
-    mainstream fashion. This post explores how to incorporate street style elements into your everyday 
-    wardrobe, from oversized silhouettes to bold color combinations and statement accessories.`
-  },
-  {
-    id: 5,
-    title: 'Accessories Guide',
-    excerpt: 'Complete your look with these must-have accessories.',
-    image: '/photo5.jpeg',
-    date: new Date('2025-03-19'),
-    author: 'Lisa Accessories',
-    content: `The right accessories can transform any outfit from ordinary to extraordinary. This guide 
-    covers the essential accessories for 2025, from statement jewelry to versatile bags and shoes. Learn 
-    how to mix and match accessories to create unique looks that express your personal style.`
-  },
-  {
-    id: 6,
-    title: 'Fashion Week Highlights',
-    excerpt: 'The best moments from this year\'s fashion week.',
-    image: '/photo6.jpeg',
-    date: new Date('2025-03-17'),
-    author: 'Mark Fashion',
-    content: `Fashion Week 2025 brought together the world's most innovative designers and trendsetters. 
-    This post highlights the most memorable moments, from groundbreaking collections to celebrity sightings 
-    and the emerging trends that will shape fashion in the coming months.`
-  }
-];
 
 function BlogPost() {
   const { id } = useParams();
   const [post, setPost] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
+  const { user } = useAuth();
 
   useEffect(() => {
-    // Find the post with matching id
-    const foundPost = blogPosts.find(post => post.id === parseInt(id));
-    setPost(foundPost);
+    const fetchPost = async () => {
+      if (!id) {
+        setError('Invalid post ID');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const response = await axios.get(`http://localhost:3001/api/posts/${id}`);
+        
+        if (response.data) {
+          setPost(response.data);
+          setError(null);
+        } else {
+          setError('Post not found');
+        }
+      } catch (err) {
+        if (err.response?.status === 404) {
+          setError('Post not found');
+        } else if (err.code === 'ERR_NETWORK') {
+          setError('Network error - Please check if the server is running');
+        } else {
+          setError(err.response?.data?.message || 'Failed to load post');
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPost();
   }, [id]);
 
-  if (!post) {
+  const handleDelete = async () => {
+    if (!user) {
+      setError('Please log in to delete posts');
+      return;
+    }
+
+    if (!window.confirm('Are you sure you want to delete this post?')) {
+      return;
+    }
+
+    try {
+      await axios.delete(`http://localhost:3001/api/posts/${id}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      navigate('/');
+    } catch (err) {
+      setError('Failed to delete post. Please try again.');
+    }
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return 'Unknown date';
+    try {
+      return new Date(dateString).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+    } catch (err) {
+      return 'Invalid date';
+    }
+  };
+
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return null;
+    if (imagePath.startsWith('http')) return imagePath;
+    return `http://localhost:3001${imagePath}`;
+  };
+
+  if (loading) {
     return (
       <div className="container">
-        <div className="error-message">Post not found</div>
+        <div className="loading">Loading post...</div>
       </div>
     );
   }
 
+  if (error || !post) {
+    return (
+      <div className="container">
+        <div className="error-container">
+          <div className="error-message">{error || 'Post not found'}</div>
+          <button onClick={() => navigate('/')} className="back-button">
+            Back to Home
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const isAuthor = user && post.authorId === user.id;
+
   return (
     <div className="container">
-      <article className="post-card post-detail">
+      <article className="post-detail">
         <div className="post-image">
           <img
-            src={post.image || `/photo${Math.floor(Math.random() * 3) + 1}.jpeg`}
+            src={getImageUrl(post.image) || `/photo${Math.floor(Math.random() * 3) + 1}.jpeg`}
             alt={post.title}
+            onError={(e) => {
+              e.target.src = `/photo${Math.floor(Math.random() * 3) + 1}.jpeg`;
+            }}
           />
+          {isAuthor && (
+            <div className="post-actions">
+              <button 
+                onClick={() => navigate(`/edit/${post.id}`)} 
+                className="edit-button"
+              >
+                Edit Post
+              </button>
+              <button 
+                onClick={handleDelete} 
+                className="delete-button"
+              >
+                Delete Post
+              </button>
+            </div>
+          )}
         </div>
         <div className="post-content">
-          <h1 className="post-title">{post.title}</h1>
+          <div className="post-header">
+            <h1 className="post-title">{post.title}</h1>
+          </div>
           <p className="post-meta">
-            By {post.author} • {post.date.toLocaleDateString('en-US', { 
-              year: 'numeric', 
-              month: 'short', 
-              day: 'numeric' 
-            })}
+            By {post.author?.username || 'Unknown'} • {formatDate(post.createdAt)}
           </p>
           <div className="post-body">
             {post.content}
           </div>
+          {post.tags && post.tags.length > 0 && (
+            <div className="post-tags">
+              <div className="tags-container">
+                {post.tags.map((tag, index) => (
+                  <span key={index} className="tag">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+          <button onClick={() => navigate('/')} className="back-button">
+            Back to Home
+          </button>
         </div>
       </article>
     </div>

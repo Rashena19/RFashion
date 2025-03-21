@@ -1,113 +1,149 @@
-.create-post-container {
-  max-width: 1200px;
+.container {
+  max-width: 800px;
   margin: 2rem auto;
   padding: 0 1rem;
 }
 
-.create-post-content {
-  background-color: #ffffff;
+.create-post {
+  background: white;
+  padding: 2rem;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  padding: 2rem;
 }
 
-.create-post-title {
-  font-size: 2.5rem;
-  color: #2c3e50;
+.create-post h1 {
   margin-bottom: 2rem;
-  font-family: 'Playfair Display', serif;
-  font-weight: 700;
-  text-align: center;
-}
-
-.create-post-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+  color: #333;
+  font-size: 2rem;
 }
 
 .form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .form-group label {
-  font-size: 1.1rem;
-  color: #2c3e50;
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #555;
   font-weight: 500;
 }
 
-.form-group input,
+.form-group input[type="text"],
+.form-group input[type="file"],
 .form-group textarea {
-  padding: 0.8rem;
-  border: 1px solid #e8d3d1;
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 1rem;
-  color: #34495e;
-  transition: border-color 0.3s ease;
+  transition: border-color 0.2s;
 }
 
-.form-group input:focus,
+.form-group input[type="text"]:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #d4c3c1;
-  box-shadow: 0 0 0 2px rgba(232, 211, 209, 0.2);
+  border-color: #007bff;
 }
 
 .form-group textarea {
   resize: vertical;
-  min-height: 200px;
+  min-height: 100px;
+}
+
+.image-preview {
+  margin-top: 1rem;
+  max-width: 100%;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.image-preview img {
+  width: 100%;
+  height: auto;
+  max-height: 300px;
+  object-fit: cover;
+  border-radius: 4px;
 }
 
 .form-actions {
   display: flex;
   gap: 1rem;
-  margin-top: 1rem;
+  margin-top: 2rem;
 }
 
 .submit-button,
 .cancel-button {
-  padding: 0.8rem 2rem;
+  padding: 0.75rem 1.5rem;
   border: none;
   border-radius: 4px;
   font-size: 1rem;
-  font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.2s;
 }
 
 .submit-button {
-  background-color: #e8d3d1;
-  color: #2c3e50;
+  background-color: #007bff;
+  color: white;
 }
 
 .submit-button:hover {
-  background-color: #d4c3c1;
+  background-color: #0056b3;
+}
+
+.submit-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
 }
 
 .cancel-button {
-  background-color: #f8f9fa;
-  color: #7f8c8d;
-  border: 1px solid #e8d3d1;
+  background-color: #6c757d;
+  color: white;
 }
 
 .cancel-button:hover {
-  background-color: #e8d3d1;
-  color: #2c3e50;
+  background-color: #545b62;
 }
 
+.error-message {
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  border: 1px solid #f5c6cb;
+}
+
+.loading {
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.2rem;
+  color: #666;
+}
+
+/* File input styling */
+.form-group input[type="file"] {
+  padding: 0.5rem;
+  background-color: #f8f9fa;
+  border: 2px dashed #ddd;
+  cursor: pointer;
+}
+
+.form-group input[type="file"]:hover {
+  border-color: #007bff;
+}
+
+/* Responsive design */
 @media (max-width: 768px) {
-  .create-post-container {
+  .container {
     margin: 1rem auto;
   }
 
-  .create-post-content {
-    padding: 1.5rem;
+  .create-post {
+    padding: 1rem;
   }
 
-  .create-post-title {
-    font-size: 2rem;
+  .create-post h1 {
+    font-size: 1.5rem;
   }
 
   .form-actions {

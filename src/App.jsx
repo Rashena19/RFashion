@@ -8,6 +8,7 @@ import Login from './pages/Login';
 import SignUp from './pages/SignUp';
 import CreatePost from './pages/CreatePost';
 import BlogPost from './pages/BlogPost';
+import EditPost from './pages/EditPost';
 import Profile from './pages/Profile';
 import './styles/App.css';
 
@@ -53,9 +54,13 @@ function AppRoutes() {
           />
           <Route 
             path="/post/:id" 
+            element={<BlogPost />}
+          />
+          <Route 
+            path="/edit/:id" 
             element={
               <ProtectedRoute>
-                <BlogPost />
+                <EditPost />
               </ProtectedRoute>
             } 
           />
