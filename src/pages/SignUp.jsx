@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import '../styles/SignUp.css';
+import '../styles/Signup.css';
 
 function SignUp() {
   const [formData, setFormData] = useState({
