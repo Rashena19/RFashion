@@ -1,6 +1,7 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../config/database.js';
 import User from './User.js';
+import Comment from './Comment.js';
 
 const Post = sequelize.define('Post', {
   id: {
@@ -40,6 +41,14 @@ const Post = sequelize.define('Post', {
       key: 'id',
     },
   },
+  likes: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+  },
+  likedBy: {
+    type: DataTypes.ARRAY(DataTypes.UUID),
+    defaultValue: [],
+  }
 });
 
 // Define relationships
@@ -51,6 +60,16 @@ Post.belongsTo(User, {
 User.hasMany(Post, {
   foreignKey: 'authorId',
   as: 'posts',
+});
+
+Post.hasMany(Comment, {
+  foreignKey: 'postId',
+  as: 'comments',
+});
+
+Comment.belongsTo(Post, {
+  foreignKey: 'postId',
+  as: 'post',
 });
 
 export default Post; 

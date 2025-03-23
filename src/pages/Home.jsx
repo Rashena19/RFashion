@@ -13,25 +13,48 @@ function Home() {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const response = await axios.get('http://localhost:3001/api/posts');
-        console.log('Fetched posts:', response.data); // Debug log
+        console.log('Starting to fetch posts...');
+        console.log('Current user:', user);
+        
+        const response = await axios.get('http://localhost:3001/api/posts', {
+          headers: {
+            'Content-Type': 'application/json',
+            ...(user?.token && { Authorization: `Bearer ${user.token}` })
+          }
+        });
+        
+        console.log('Response status:', response.status);
+        console.log('Response headers:', response.headers);
+        console.log('Response data:', response.data);
         
         if (Array.isArray(response.data)) {
+          console.log('Setting posts:', response.data);
           setPosts(response.data);
         } else {
           console.error('Invalid data format received:', response.data);
           setError('Invalid data format received from server');
         }
       } catch (err) {
-        console.error('Error details:', err.response || err); // Debug log
-        setError(err.response?.data?.message || 'Failed to load posts');
+        console.error('Error fetching posts:', err);
+        console.error('Error response:', err.response);
+        console.error('Error message:', err.message);
+        console.error('Error status:', err.response?.status);
+        console.error('Error data:', err.response?.data);
+        
+        if (err.response?.status === 401) {
+          setError('Please log in to view posts');
+        } else if (err.response?.status === 404) {
+          setError('No posts found');
+        } else {
+          setError(err.response?.data?.message || 'Failed to load posts');
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchPosts();
-  }, []);
+  }, [user]);
 
   const formatDate = (dateString) => {
     try {

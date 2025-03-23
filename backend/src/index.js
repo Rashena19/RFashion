@@ -7,6 +7,10 @@ import { testConnection } from './config/database.js';
 import sequelize from './config/database.js';
 import authRoutes from './routes/authRoutes.js';
 import postRoutes from './routes/postRoutes.js';
+import commentRoutes from './routes/commentRoutes.js';
+import './models/User.js';
+import './models/Post.js';
+import './models/Comment.js';
 
 dotenv.config();
 
@@ -18,11 +22,13 @@ const __dirname = path.dirname(__filename);
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
 
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
+app.use('/api/comments', commentRoutes);
 
 // Test route
 app.get('/', (req, res) => {
@@ -40,11 +46,22 @@ const initializeApp = async () => {
     console.log('Database synchronized');
 
     // Start server
-    app.listen(PORT, () => {
+    const server = app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });
+
+    // Handle server errors
+    server.on('error', (error) => {
+      if (error.code === 'EADDRINUSE') {
+        console.error(`Port ${PORT} is already in use. Please try a different port or kill the process using this port.`);
+      } else {
+        console.error('Server error:', error);
+      }
+    });
+
   } catch (error) {
     console.error('Failed to initialize app:', error);
+    process.exit(1);
   }
 };
 
