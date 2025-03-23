@@ -43,7 +43,6 @@ function About() {
           <h2 className="section-title">Our Values</h2>
           <ul className="values-list">
             <li>Sustainability in every aspect of our operations</li>
-            <li>Ethical fashion practices and fair trade</li>
             <li>Community engagement and support</li>
             <li>Innovation in sustainable fashion</li>
             <li>Transparency in our business practices</li>
